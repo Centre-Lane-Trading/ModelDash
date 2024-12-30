@@ -48,7 +48,7 @@ app.layout = html.Div([
         
         # User input row
         html.Tr(
-            [html.Td('User Bids')] + 
+            [html.Td('User Predictions')] + 
             [html.Td(dcc.Input(
                 id=f'user-input-{i}',
                 type='number',
