@@ -75,9 +75,10 @@ app.layout = html.Div([
 @app.callback(
     [Output('how-shocky', 'figure'),
      Output('model-spread', 'figure')],
-    [Input('view-selector', 'value')]
+    [Input('view-selector', 'value'),
+     Input('prediction-slider', 'value')]
 )
-def update_graphs(view_selector):
+def update_graphs(view_selector, slider_value):
     show_last_day = 'last_day' in view_selector
     
     if show_last_day:
@@ -91,6 +92,10 @@ def update_graphs(view_selector):
 
     fig1.add_trace(go.Scatter(x=df.index, y=df["NYIS pjm DA"], mode='lines', name="regular forecast", line_shape='hv'))
     fig1.add_trace(go.Scatter(x=df.index, y=df["NYISpjm shock X forecast"], mode='lines', name="NYISpjm shock x forecast", line_shape='hv'))
+    
+    # Calculate and add user predictions
+    user_predictions = df["NYISpjm shock X forecast"] + slider_value
+    fig1.add_trace(go.Scatter(x=df.index, y=user_predictions, mode='lines', name="User Predictions", line=dict(color='black', width=2), line_shape='hv'))
 
     colors = []
     for i, row in df.iterrows():
