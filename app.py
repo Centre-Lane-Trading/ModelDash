@@ -30,6 +30,17 @@ app.layout = html.Div([
     html.Div(id='download-and-table', children=[
         html.Button("Download Data", id="btn-download"),
         dcc.Download(id="download-dataframe-csv"),
+        html.Div([
+            html.Label(id='slider-label'),
+            dcc.Slider(
+                id='prediction-slider',
+                min=-50,
+                max=50,
+                step=1,
+                value=0,
+                marks={i: str(i) for i in range(-50, 51, 10)},
+            ),
+        ], style={'margin': '20px 0'}),
         html.Table([
             html.Tr([html.Th('Hour')] + [html.Th(str(i)) for i in range(0, 24)]),
             html.Tr(
@@ -42,11 +53,7 @@ app.layout = html.Div([
             ),
             html.Tr(
                 [html.Td('User Predictions')] + 
-                [html.Td(dcc.Input(
-                    id=f'user-input-{i}',
-                    type='number',
-                    style={'width': '50px'}
-                )) for i in range(0, 24)]
+                [html.Td(id=f'user-prediction-{i}') for i in range(0, 24)]
             )
         ], style={
             'border-collapse': 'collapse',
@@ -54,6 +61,15 @@ app.layout = html.Div([
             'textAlign': 'center'
         })
     ]),
+    dcc.Dropdown(
+        id='model-selector',
+        options=[
+            {'label': 'NYIS pjm DA', 'value': 'NYIS pjm DA'},
+            {'label': 'NYISpjm shock X forecast', 'value': 'NYISpjm shock X forecast'}
+        ],
+        value='NYISpjm shock X forecast',
+        style={'width': '300px', 'margin-bottom': '10px'}
+    ),
 ])
 
 @app.callback(
@@ -147,15 +163,35 @@ def func(n_clicks):
 
 @app.callback(
     [Output(f'nyis-da-{i}', 'children') for i in range(0, 24)] +
-    [Output(f'nyis-shock-{i}', 'children') for i in range(0, 24)],
-    Input('how-shocky', 'id')
+    [Output(f'nyis-shock-{i}', 'children') for i in range(0, 24)] +
+    [Output(f'user-prediction-{i}', 'children') for i in range(0, 24)],
+    [Input('view-selector', 'value'),
+     Input('prediction-slider', 'value'),
+     Input('model-selector', 'value')]
 )
-def update_table(id):
+def update_table(view_selector, slider_value, selected_model):
     last_day = actual.df.index.max().date()
-    df_last_day = actual.df[actual.df.index.date == last_day]
-    da_values = df_last_day['NYIS pjm DA'].round(2).tolist()
-    shock_values = df_last_day['NYISpjm shock X forecast'].round(2).tolist()
-    return da_values + shock_values
+    if 'last_day' in view_selector:
+        df = actual.df[actual.df.index.date == last_day]
+    else:
+        df = actual.df
+
+    da_values = df['NYIS pjm DA'].round(2).tolist()
+    shock_values = df['NYISpjm shock X forecast'].round(2).tolist()
+    base_values = df[selected_model].round(2).tolist()
+    user_predictions = [round(base + slider_value, 2) for base in base_values]
+
+    # Ensure we have exactly 24 values for each list
+    da_values = da_values[:24]
+    shock_values = shock_values[:24]
+    user_predictions = user_predictions[:24]
+
+    # Pad lists if they have fewer than 24 values
+    da_values += [None] * (24 - len(da_values))
+    shock_values += [None] * (24 - len(shock_values))
+    user_predictions += [None] * (24 - len(user_predictions))
+
+    return da_values + shock_values + user_predictions
 
 @app.callback(
     Output('download-and-table', 'style'),
@@ -166,6 +202,14 @@ def toggle_download_and_table(view_selector):
         return {'display': 'block'}
     else:
         return {'display': 'none'}
+    
+
+@app.callback(
+    Output('slider-label', 'children'),
+    [Input('model-selector', 'value')]
+)
+def update_slider_label(selected_model):
+    return f"Adjust predictions offset from {selected_model}:"
 
 if __name__ == '__main__':
     app.run_server(debug=True)
