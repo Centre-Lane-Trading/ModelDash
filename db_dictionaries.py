@@ -112,7 +112,9 @@ feature_units_dict = {
     "PJM Multiple Fuels Gen": "mw",
     "PJM Other Renewables Gen": "mw",
     "PJM Storage MW": "mw",
-    "PJM_Nuclear Gen": "mw"
+    "PJM_Nuclear Gen": "mw",
+    "PJM nyis DA regular prediction":   "dollars",
+    "NYIS pjm DA regular prediction":   "dollars"
 }
 
 feature_db_name_to_read_name_dict = {
@@ -151,7 +153,9 @@ feature_db_name_to_read_name_dict = {
     "pjm_fuel_multiple_fuels_mw" :      "PJM Multiple Fuels Gen",
     "pjm_fuel_other_renewables_mw" :    "PJM Other Renewables Gen",
     "pjm_fuel_storage_mw" :             "PJM Storage MW",
-    "pjm_fuel_nuclear_mw" :             "PJM_Nuclear Gen"
+    "pjm_fuel_nuclear_mw" :             "PJM Nuclear Gen",
+    "5413134.0;pjm_nyiso_v2.0.0;lmp_pred;da": "PJM nyis DA regular prediction",
+    "24065;nyiso_pjm_v2.0.0;lmp_pred;da": "NYIS pjm DA regular prediction"
 }
 
 feature_read_name_to_db_name_dict = {
@@ -191,4 +195,6 @@ feature_read_name_to_db_name_dict = {
     "PJM Other Renewables Gen" :        "pjm_fuel_other_renewables_mw",
     "PJM Storage MW" :                  "pjm_fuel_storage_mw",
     "PJM_Nuclear Gen" :                 "pjm_fuel_nuclear_mw",
+    "PJM nyis DA regular prediction":   "5413134.0;pjm_nyiso_v2.0.0;lmp_pred;da",
+    "NYIS pjm DA regular prediction":   "24065;nyiso_pjm_v2.0.0;lmp_pred;da"
 }

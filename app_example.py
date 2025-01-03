@@ -4,6 +4,19 @@ from dash import Dash, dcc, html
 from dash.dependencies import Input, Output, State
 import Class
 import io
+def calculate_user_predictions(df, slider_percentage):
+    percentage = slider_percentage / 100.0
+    user_predictions = []
+    for index, row in df.iterrows():
+        regular_model = row['NYIS pjm DA']
+        shock_model = row['NYISpjm shock X forecast']
+        abs_difference = abs(shock_model - regular_model)
+        if shock_model > regular_model:
+            prediction = regular_model + (abs_difference * percentage)
+        else:
+            prediction = shock_model + (abs_difference * percentage)
+        user_predictions.append(prediction)
+    return user_predictions
 
 start_date = "2024-12-2"
 end_date = "2024-12-15"
@@ -34,11 +47,11 @@ app.layout = html.Div([
             html.Label(id='slider-label'),
             dcc.Slider(
                 id='prediction-slider',
-                min=-50,
-                max=50,
+                min=0,
+                max=100,
                 step=1,
                 value=0,
-                marks={i: str(i) for i in range(-50, 51, 10)},
+                marks={i: f'{i}%' for i in range(0, 101, 10)},
             ),
         ], style={'margin': '20px 0'}),
         html.Table([
